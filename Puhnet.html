@@ -1,0 +1,795 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Пухнет AI</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ background:linear-gradient(160deg,#eaf1ff,#f1edff);
+ font-family:Arial,sans-serif;
+ color:#29364d;
+ min-height:100vh;
+ display:flex;
+ justify-content:center;
+}
+.app{
+ width:100%;max-width:520px;height:100dvh;
+ display:flex;flex-direction:column;
+ padding:12px;gap:10px;
+}
+header{
+ display:flex;align-items:center;
+ justify-content:space-between;padding:8px 5px;
+}
+header h2{margin:0;font-size:22px}
+button{
+ border:0;border-radius:15px;padding:12px 15px;
+ background:white;color:#33415c;font-weight:bold;
+ cursor:pointer;box-shadow:0 3px 10px #9eb4d333;
+}
+button:active{transform:scale(.96)}
+#sound{font-size:20px;padding:9px}
+
+/* ОБЛАЧКО */
+.pet-area{
+ flex:0 0 245px;
+ display:flex;align-items:center;
+ justify-content:center;
+ position:relative;overflow:hidden;
+}
+.cloud{
+ position:relative;
+ width:165px;height:115px;
+ border-radius:48% 48% 43% 43%;
+ background:
+  radial-gradient(ellipse at 50% 75%,#ff9cc9 0%,transparent 37%),
+  linear-gradient(145deg,#8798ff 0%,#5365ff 35%,#2938d4 75%,#202ba8 100%);
+ box-shadow:
+  0 0 18px #5365ff99,
+  0 0 35px #5365ff77,
+  inset 5px 7px 15px #ffffff66,
+  inset -8px -12px 18px #1928a988;
+ animation:float 3.5s ease-in-out infinite;
+ transition:filter .3s;
+}
+.cloud:before,.cloud:after{
+ content:"";position:absolute;
+ border-radius:50%;
+ background:linear-gradient(145deg,#7285ff,#3546df 75%);
+ box-shadow:inset 4px 5px 12px #ffffff55,0 0 16px #5365ff88;
+}
+.cloud:before{
+ width:75px;height:75px;left:-12px;top:27px;
+}
+.cloud:after{
+ width:72px;height:72px;right:-12px;top:27px;
+}
+.face{position:absolute;z-index:3;inset:0}
+.brow,.blush{display:none}
+.eye{
+ position:absolute;top:37px;width:9px;height:24px;
+ background:white;border-radius:10px;
+ box-shadow:0 0 9px #ffffffbb;
+ transform:rotate(19deg);
+ transition:.25s;
+}
+.eye.left{left:62px}
+.eye.right{right:62px}
+@keyframes float{
+ 0%,100%{transform:translateY(0) rotate(0)}
+ 50%{transform:translateY(-9px) rotate(1deg)}
+}
+
+/* ЭМОЦИИ */
+.cloud.angry .eye,.cloud.rage .eye{
+ height:17px;transform:rotate(35deg);
+}
+.cloud.sad .eye,.cloud.crying .eye{
+ height:14px;transform:rotate(-15deg);
+}
+.cloud.happy .eye,.cloud.laughing .eye{
+ height:7px;transform:rotate(0);
+}
+.cloud.love .eye{
+ height:20px;transform:rotate(25deg);
+}
+.cloud.cold{
+ filter:hue-rotate(15deg) brightness(1.2);
+}
+.cloud.party{
+ filter:brightness(1.2) drop-shadow(0 0 12px #a3aaff);
+}
+.cloud.angry,.cloud.rage{
+ filter:hue-rotate(-20deg) drop-shadow(0 0 12px #ff526f);
+}
+.cloud.tender{
+ filter:brightness(1.08);
+}
+.cloud.angel{
+ filter:brightness(1.2) drop-shadow(0 0 10px white);
+}
+.cloud.smirk .eye.right{
+ transform:rotate(40deg);
+ height:13px;
+}
+.cloud.wink .eye.right{
+ height:3px;top:47px;
+}
+
+/* ЧАТ */
+.chat{
+ flex:1;min-height:90px;overflow-y:auto;
+ background:#ffffffa8;border:1px solid white;
+ border-radius:20px;padding:12px;
+ display:flex;flex-direction:column;gap:10px;
+}
+.msg{
+ max-width:85%;padding:11px 14px;
+ border-radius:17px;line-height:1.35;
+ word-break:break-word;
+}
+.user{
+ align-self:flex-end;background:#dceaff;
+ border-bottom-right-radius:5px;
+}
+.bot{
+ align-self:flex-start;background:white;
+ border-bottom-left-radius:5px;font-size:23px;
+}
+.system{
+ align-self:center;font-size:13px;
+ color:#8190a7;text-align:center;
+}
+.input-area{display:flex;gap:8px}
+input{
+ min-width:0;flex:1;border:0;border-radius:15px;
+ padding:14px;font-size:16px;outline:none;
+ box-shadow:0 3px 10px #9eb4d333;
+}
+#send{background:#8db8ff;color:white;font-size:17px}
+.hint{
+ text-align:center;color:#8a98ad;
+ font-size:12px;margin-top:-4px;
+}
+.actions{
+ display:grid;grid-template-columns:repeat(4,1fr);gap:7px;
+}
+.actions button{padding:12px 4px;font-size:12px}
+.hidden{display:none!important}
+.game{
+ background:white;border-radius:18px;padding:14px;
+ text-align:center;
+}
+.game h3{margin:0 0 10px}
+.game .big{font-size:36px;margin:12px}
+.choices{
+ display:flex;justify-content:center;gap:12px;flex-wrap:wrap;
+}
+.choices button{font-size:27px;padding:12px}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<header>
+ <h2>☁️ Пухнет</h2>
+ <button id="sound" onclick="toggleSound()">🔊</button>
+</header>
+
+<section class="pet-area">
+ <div class="cloud happy" id="cloud">
+  <div class="face">
+   <div class="eye left"></div>
+   <div class="eye right"></div>
+  </div>
+ </div>
+</section>
+
+<section class="chat" id="chat">
+ <div class="system">Пухнет проснулся!</div>
+ <div class="msg bot">🥹👋</div>
+</section>
+
+<div class="game hidden" id="game"></div>
+
+<div class="input-area">
+ <input id="message" placeholder="Напиши Пухнету..." autocomplete="off">
+ <button id="send" onclick="sendMessage()">➤</button>
+</div>
+
+<div class="hint">Пока он не может тебя понимать. Подожди немного</div>
+
+<div class="actions" id="actions">
+ <button onclick="feed()">🍪 Покормить</button>
+ <button onclick="pet()">💗 Погладить</button>
+ <button onclick="startRebus()">🧩 Ребус</button>
+ <button onclick="startRPS()">✊ КНБ</button>
+</div>
+
+</div>
+
+<script>
+const cloud=document.getElementById('cloud');
+const chat=document.getElementById('chat');
+const game=document.getElementById('game');
+const actions=document.getElementById('actions');
+const input=document.getElementById('message');
+
+let soundOn=true;
+let busy=false;
+let cookies=3;
+let gameMode='';
+let puzzleIndex=0;
+let userWins=0;
+let botWins=0;
+let audioCtx=null;
+
+let memory={
+ cookiesStolen:false,
+ complimented:false,
+ fed:false,
+ lastMood:'happy'
+};
+
+/* ЗВУКИ */
+
+function toggleSound(){
+ soundOn=!soundOn;
+ document.getElementById('sound').textContent=soundOn?'🔊':'🔇';
+}
+
+function getAudio(){
+ if(!audioCtx){
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+ }
+ if(audioCtx.state==='suspended')audioCtx.resume();
+ return audioCtx;
+}
+
+function tone(freq,start,duration,type='sine',volume=.05,endFreq=null){
+ const ctx=getAudio();
+ const osc=ctx.createOscillator();
+ const gain=ctx.createGain();
+
+ osc.type=type;
+ osc.frequency.setValueAtTime(freq,start);
+
+ if(endFreq){
+  osc.frequency.exponentialRampToValueAtTime(endFreq,start+duration);
+ }
+
+ gain.gain.setValueAtTime(.001,start);
+ gain.gain.exponentialRampToValueAtTime(volume,start+.025);
+ gain.gain.exponentialRampToValueAtTime(.001,start+duration);
+
+ osc.connect(gain);
+ gain.connect(ctx.destination);
+ osc.start(start);
+ osc.stop(start+duration+.03);
+}
+
+function noise(start,duration,volume=.025,filterFreq=900){
+ const ctx=getAudio();
+ const buffer=ctx.createBuffer(
+  1,Math.floor(ctx.sampleRate*duration),ctx.sampleRate
+ );
+ const data=buffer.getChannelData(0);
+
+ for(let i=0;i<data.length;i++){
+  data[i]=Math.random()*2-1;
+ }
+
+ const src=ctx.createBufferSource();
+ const filter=ctx.createBiquadFilter();
+ const gain=ctx.createGain();
+
+ filter.type='lowpass';
+ filter.frequency.value=filterFreq;
+
+ gain.gain.setValueAtTime(.001,start);
+ gain.gain.linearRampToValueAtTime(volume,start+.04);
+ gain.gain.exponentialRampToValueAtTime(.001,start+duration);
+
+ src.buffer=buffer;
+ src.connect(filter);
+ filter.connect(gain);
+ gain.connect(ctx.destination);
+
+ src.start(start);
+ src.stop(start+duration);
+}
+
+function playSound(mood){
+ if(!soundOn)return;
+
+ try{
+  const ctx=getAudio();
+  const now=ctx.currentTime+.02;
+
+  if(mood==='laughing'){
+   for(let i=0;i<5;i++){
+    const t=now+i*.19;
+    tone(360+(i%2)*90,t,.12,'triangle',.075,520);
+    tone(680,t+.04,.08,'sine',.018,450);
+   }
+   noise(now,.85,.012,1600);
+  }
+
+  else if(mood==='angry'||mood==='rage'){
+   tone(125,now,.45,'sawtooth',.045,85);
+   tone(155,now+.08,.35,'triangle',.035,105);
+   noise(now,.4,.035,500);
+   tone(95,now+.43,.22,'sawtooth',.04,70);
+  }
+
+  else if(mood==='sad'){
+   tone(420,now,.5,'sine',.045,300);
+   tone(300,now+.42,.5,'sine',.035,240);
+  }
+
+  else if(mood==='crying'){
+   for(let i=0;i<4;i++){
+    const t=now+i*.3;
+    tone(620,t,.22,'sine',.045,420);
+    tone(490,t+.12,.16,'triangle',.035,350);
+   }
+   noise(now,.9,.012,1100);
+  }
+
+  else if(mood==='happy'||mood==='party'){
+   tone(520,now,.15,'sine',.045,750);
+   tone(680,now+.14,.16,'sine',.05,900);
+   tone(800,now+.30,.22,'sine',.045,1050);
+
+   if(mood==='party'){
+    tone(950,now+.55,.16,'triangle',.045,1200);
+   }
+  }
+
+  else if(mood==='love'||mood==='tender'){
+   tone(520,now,.3,'sine',.04,650);
+   tone(660,now+.22,.35,'sine',.035,780);
+  }
+
+  else if(mood==='cold'){
+   tone(900,now,.12,'sine',.025,1100);
+   tone(700,now+.2,.12,'sine',.025,850);
+   noise(now,.5,.012,2000);
+  }
+
+  else if(mood==='wink'||mood==='smirk'){
+   tone(650,now,.12,'sine',.04,850);
+   tone(550,now+.16,.15,'triangle',.03,700);
+  }
+
+  else if(mood==='angel'){
+   tone(700,now,.3,'sine',.035,900);
+   tone(1000,now+.2,.35,'sine',.025,1200);
+  }
+
+ }catch(e){}
+}
+
+function mood(name){
+ cloud.className='cloud '+name;
+ memory.lastMood=name;
+ playSound(name);
+}
+
+/* ЧАТ */
+
+function addUser(text){
+ const el=document.createElement('div');
+ el.className='msg user';
+ el.textContent=text;
+ chat.appendChild(el);
+ scrollChat();
+}
+
+function addBot(emoji){
+ const el=document.createElement('div');
+ el.className='msg bot';
+ el.textContent=emoji;
+ chat.appendChild(el);
+ scrollChat();
+}
+
+function system(text){
+ const el=document.createElement('div');
+ el.className='system';
+ el.textContent=text;
+ chat.appendChild(el);
+ scrollChat();
+}
+
+function scrollChat(){
+ chat.scrollTop=chat.scrollHeight;
+}
+
+function delay(ms){
+ return new Promise(resolve=>setTimeout(resolve,ms));
+}
+
+function normalize(s){
+ return s.toLowerCase().replace(/ё/g,'е').trim();
+}
+
+/* РАСПОЗНАВАНИЕ ОСКОРБЛЕНИЙ */
+
+function isInsultDirectedAtPuhnet(text){
+ const words=normalize(text).match(/[а-яa-z0-9-]+/g)||[];
+
+ const insults=[
+  'лох','лохушка','идиот','идиотка',
+  'дебил','дебилка','дурак','дура',
+  'тупой','тупая','тупица','придурок',
+  'кретин','урод','глупый','глупая',
+  'ничтожество','бестолочь','мерзкий',
+  'противный','лохматый'
+ ];
+
+ const targets=[
+  'ты','тебя','тебе','тобой',
+  'твой','твоя','твое','твои',
+  'пухнет','пухнета','пухнету'
+ ];
+
+ const hasTarget=words.some(w=>targets.includes(w));
+
+ const hasInsult=words.some(word=>
+  insults.some(bad=>
+   word===bad ||
+   (bad.length>=4 && word.startsWith(bad) && word.length<=bad.length+4)
+  )
+ );
+
+ return hasTarget&&hasInsult;
+}
+
+/* ОТПРАВКА СООБЩЕНИЙ */
+
+async function sendMessage(){
+ const text=input.value.trim();
+ if(!text)return;
+
+ input.value='';
+ addUser(text);
+
+ if(!game.classList.contains('hidden')){
+  if(gameMode==='rebus')checkRebus(text);
+  return;
+ }
+
+ if(busy){
+  addBot('😤');
+  return;
+ }
+
+ await understand(text);
+}
+
+async function understand(raw){
+ const t=normalize(raw);
+
+ // Печеньки
+ if(/съел.*печень|съела.*печень|забрал.*печень|украл.*печень/.test(t)){
+  memory.cookiesStolen=true;
+  busy=true;
+  mood('rage');
+  await delay(1700);
+  mood('crying');
+  addBot('🤬😭');
+  await delay(800);
+  mood('sad');
+  busy=false;
+  return;
+ }
+
+ // Оскорбления, направленные на Пухнета
+ if(isInsultDirectedAtPuhnet(t)){
+  busy=true;
+  mood('angry');
+  await delay(1600);
+  mood('crying');
+  addBot('🤬😭💔');
+  await delay(800);
+  mood('sad');
+  busy=false;
+  return;
+ }
+
+ // Извинения
+ if(/прости|извини|не хотел|не хотела/.test(t)){
+  if(memory.cookiesStolen){
+   mood('tender');
+   addBot('🥺💗');
+   memory.cookiesStolen=false;
+  }else{
+   mood('happy');
+   addBot('😇💗');
+  }
+  return;
+ }
+
+ // Добрые слова
+ if(/люблю тебя|ты классный|ты хороший|молодец|умный|красивый|ты лучший|спасибо/.test(t)){
+  memory.complimented=true;
+  mood('love');
+  addBot('🥹💗');
+  return;
+ }
+
+ // Шутки
+ if(/шутка|смешно|ха-ха|ахах|хах/.test(t)){
+  mood('laughing');
+  addBot('😂🤣');
+  return;
+ }
+
+ // Грусть пользователя
+ if(/грустно|плохо|печально|я расстроен|я расстроена/.test(t)){
+  mood('tender');
+  addBot('🥺💗');
+  return;
+ }
+
+ // Злость пользователя
+ if(/злюсь|бесит|раздражает|я зол|я зла/.test(t)){
+  mood('sad');
+  addBot('🥺');
+  return;
+ }
+
+ // Приветствия
+ if(/привет|здравствуй|хай|ку\b/.test(t)){
+  mood('happy');
+  addBot('👋🥰');
+  return;
+ }
+
+ if(/как дела|как ты|что делаешь/.test(t)){
+  mood('happy');
+  addBot('🥰✨');
+  return;
+ }
+
+ if(/спишь|спокойной ночи/.test(t)){
+  mood('tender');
+  addBot('😴💤');
+  return;
+ }
+
+ if(/пока|до свидания/.test(t)){
+  mood('sad');
+  addBot('👋🥺');
+  return;
+ }
+
+ if(/думаешь|не знаешь|почему/.test(t)){
+  mood('smirk');
+  addBot('🤔💭');
+  return;
+ }
+
+ if(/печеньк|печенье/.test(t)){
+  if(memory.cookiesStolen){
+   mood('sad');
+   addBot('🥺🍪');
+  }else{
+   mood('happy');
+   addBot('🍪😍');
+  }
+  return;
+ }
+
+ // Случайные реакции
+ const reactions=[
+  ['happy','🥰'],
+  ['wink','😉✨'],
+  ['cold','🥶❄️'],
+  ['tender','🥹💗'],
+  ['angel','😇✨'],
+  ['party','🥳🎉'],
+  ['smirk','😏'],
+  ['laughing','😂🤣']
+ ];
+
+ const r=reactions[Math.floor(Math.random()*reactions.length)];
+ mood(r[0]);
+ addBot(r[1]);
+}
+
+/* КОРМЛЕНИЕ */
+
+async function feed(){
+ if(busy||!game.classList.contains('hidden'))return;
+
+ busy=true;
+
+ if(cookies<=0){
+  mood('sad');
+  addBot('🥺🍪');
+  busy=false;
+  return;
+ }
+
+ cookies--;
+ mood('happy');
+ addBot('😍🍪');
+
+ const el=document.createElement('div');
+ el.className='system';
+ el.textContent='🍪';
+ chat.appendChild(el);
+
+ await delay(900);
+ el.style.transition='1s';
+ el.style.opacity='0';
+ el.style.transform='scale(.1)';
+
+ await delay(1000);
+ el.remove();
+
+ memory.fed=true;
+ mood('love');
+ addBot('🥰💗');
+ busy=false;
+}
+
+/* ПОГЛАЖИВАНИЕ */
+
+function pet(){
+ if(busy||!game.classList.contains('hidden'))return;
+ mood('love');
+ addBot('🥰💗');
+}
+
+/* РЕБУСЫ */
+
+const puzzles=[
+ ['🐈‍⬛👢',['кот в сапогах','котвсапогах']],
+ ['🕷️🦸‍♂️🕸️',['человек паук','человек-паук','человекпаук']],
+ ['❄️👸',['снежная королева','снежнаякоролева']],
+ ['🐸👑',['царевна лягушка','царевна-лягушка']],
+ ['🍋🥤',['лимонад']],
+ ['🎄🎁',['новый год','новыйгод']],
+ ['🌈🌧️',['радуга']],
+ ['🐻🍯',['винни пух','винни-пух','виннипух']],
+ ['🚀🌌',['космос']],
+ ['🐔🥚',['яйцо']],
+ ['🧊🏠',['иглу']],
+ ['🦋🌸',['бабочка']],
+ ['🐟🌊',['рыба']],
+ ['🌙⭐',['ночь']],
+ ['🍎🥧',['яблочный пирог','яблочныйпирог']],
+ ['🐰🥕',['заяц']],
+ ['🐱🐭',['кот и мышь','котимышь']],
+ ['🐝🍯',['мед','мёд']],
+ ['🐢🏁',['черепаха']],
+ ['☀️🌻',['подсолнух']]
+];
+
+function startRebus(){
+ if(busy)return;
+
+ gameMode='rebus';
+ puzzleIndex=0;
+ actions.classList.add('hidden');
+ game.classList.remove('hidden');
+ showPuzzle();
+}
+
+function showPuzzle(){
+ game.innerHTML=
+ '<h3>🧩 Угадай ребус!</h3>'+
+ '<div class="big">'+puzzles[puzzleIndex][0]+'</div>'+
+ '<div>Напиши ответ в поле ниже</div>'+
+ '<div style="margin-top:8px;color:#91a0b4;font-size:12px">'+
+ (puzzleIndex+1)+' / '+puzzles.length+'</div>';
+
+ mood('happy');
+}
+
+function checkRebus(answer){
+ const normalized=normalize(answer)
+  .replace(/[.,!?]/g,'')
+  .replace(/\s+/g,' ')
+  .trim();
+
+ if(puzzles[puzzleIndex][1].includes(normalized)){
+  mood('party');
+  addBot('🥳🎉💗');
+  puzzleIndex++;
+
+  if(puzzleIndex>=puzzles.length){
+   gameMode='';
+   game.classList.add('hidden');
+   actions.classList.remove('hidden');
+   system('Все ребусы разгаданы!');
+   mood('party');
+   addBot('🏆🥳💗');
+  }else{
+   setTimeout(showPuzzle,900);
+  }
+ }else{
+  mood('sad');
+  addBot('🤔❓');
+ }
+}
+
+/* КАМЕНЬ, НОЖНИЦЫ, БУМАГА */
+
+const moves=['✊','✌️','🖐️'];
+
+function startRPS(){
+ if(busy)return;
+
+ gameMode='rps';
+ userWins=0;
+ botWins=0;
+
+ actions.classList.add('hidden');
+ game.classList.remove('hidden');
+
+ game.innerHTML=
+ '<h3>✊ Камень, ножницы, бумага</h3>'+
+ '<p>Кто первым наберёт 3 победы?</p>'+
+ '<div id="score">Ты 0 : 0 Пухнет</div>'+
+ '<div class="choices">'+
+ '<button onclick="playRPS(0)">✊</button>'+
+ '<button onclick="playRPS(1)">✌️</button>'+
+ '<button onclick="playRPS(2)">🖐️</button>'+
+ '</div>';
+
+ mood('happy');
+}
+
+function playRPS(user){
+ if(gameMode!=='rps')return;
+
+ const bot=Math.floor(Math.random()*3);
+ let result='';
+
+ if(user===bot){
+  result='🤝😐';
+  mood('tender');
+ }else if((user-bot+3)%3===1){
+  userWins++;
+  result=moves[bot]+'😭';
+  mood('crying');
+ }else{
+  botWins++;
+  result=moves[bot]+'😎';
+  mood('smirk');
+ }
+
+ addBot(result);
+
+ document.getElementById('score').textContent=
+ 'Ты '+userWins+' : '+botWins+' Пухнет';
+
+ if(userWins>=3||botWins>=3){
+  const won=userWins>=3;
+  gameMode='';
+
+  setTimeout(()=>{
+   game.classList.add('hidden');
+   actions.classList.remove('hidden');
+   system(won?'Ты победил!':'Пухнет победил!');
+   mood(won?'party':'happy');
+   addBot(won?'🏆🥳':'😎🏆');
+  },700);
+ }
+}
+
+input.addEventListener('keydown',e=>{
+ if(e.key==='Enter')sendMessage();
+});
+</script>
+</body>
+</html>
