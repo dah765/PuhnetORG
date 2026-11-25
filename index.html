@@ -1,635 +1,579 @@
 
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#11152d">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eaf1ff">
 <title>Puhnet AI</title>
-
 <style>
-:root {
-  --text: #f4f5ff;
-  --muted: #aeb5d8;
+*{box-sizing:border-box}
+body{
+ margin:0;background:linear-gradient(160deg,#eaf1ff,#f1edff);
+ font-family:Arial,sans-serif;color:#29364d;min-height:100vh;
+ display:flex;justify-content:center;
 }
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body {
-  margin: 0; min-height: 100vh; color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: radial-gradient(ellipse at 15% 5%,#293b77 0,transparent 38%),
-  radial-gradient(ellipse at 90% 25%,#45276e 0,transparent 36%),
-  linear-gradient(145deg,#090e20,#15132f 55%,#101a35);
-  overflow-x: hidden;
+button,input{font:inherit}
+.app{
+ width:100%;max-width:520px;min-height:100dvh;
+ display:flex;flex-direction:column;padding:12px;gap:10px;
 }
-button,input { font: inherit; }
-button { cursor: pointer; color: inherit; }
-.app { width: min(100%,650px); margin: auto; padding: 18px 15px 40px; }
-.header { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:9px 3px 20px; }
-.brand { display:flex; align-items:center; gap:11px; }
-.brand-icon {
-  width:43px;height:43px;display:grid;place-items:center;border-radius:15px;
-  font-size:24px;background:linear-gradient(145deg,#718cff,#a77bff);
-  box-shadow:0 5px 25px #718cff55;
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 5px}
+header h2{margin:0;font-size:22px}
+.header-buttons{display:flex;gap:7px}
+button{
+ border:0;border-radius:15px;padding:12px 15px;
+ background:white;color:#33415c;font-weight:bold;
+ cursor:pointer;box-shadow:0 3px 10px #9eb4d333;
 }
-.brand-name { font-size:21px;font-weight:850;letter-spacing:-.6px; }
-.brand-sub { color:var(--muted);font-size:11px;margin-top:3px; }
-.icon-button {
-  width:42px;height:42px;border:1px solid #ffffff18;border-radius:14px;
-  background:#ffffff0d;font-size:18px;
+button:active{transform:scale(.96)}
+#sound,#clearChat{font-size:19px;padding:9px 12px}
+.pet-area{
+ flex:0 0 245px;display:flex;align-items:center;
+ justify-content:center;position:relative;overflow:hidden;
 }
-.icon-button:active { transform:scale(.92); }
-
-.update-notice {
-  position:relative;display:flex;align-items:flex-start;gap:12px;
-  padding:15px 43px 15px 15px;margin-bottom:17px;
-  border:1px solid #9b8bff55;border-radius:20px;
-  background:linear-gradient(110deg,#536be833,#a36bff22);
-  animation:noticeIn .55s ease both;
+.cloud{
+ position:relative;width:165px;height:115px;
+ border-radius:48% 48% 43% 43%;
+ background:
+  radial-gradient(ellipse at 50% 75%,#ff9cc9 0%,transparent 37%),
+  linear-gradient(145deg,#8798ff 0%,#5365ff 35%,#2938d4 75%,#202ba8 100%);
+ box-shadow:0 0 18px #5365ff99,0 0 35px #5365ff77,
+ inset 5px 7px 15px #ffffff66,inset -8px -12px 18px #1928a988;
+ animation:float 3.5s ease-in-out infinite;
+ transition:filter .3s;
 }
-@keyframes noticeIn { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
-.notice-symbol {
-  width:38px;height:38px;flex-shrink:0;display:grid;place-items:center;
-  border-radius:13px;background:#ffffff18;font-size:21px;
+.cloud:before,.cloud:after{
+ content:"";position:absolute;border-radius:50%;
+ background:linear-gradient(145deg,#7285ff,#3546df 75%);
+ box-shadow:inset 4px 5px 12px #ffffff55,0 0 16px #5365ff88;
 }
-.notice-title { font-weight:800;font-size:14px;margin-bottom:4px; }
-.notice-text { color:#d0d4f2;font-size:12px;line-height:1.5; }
-.notice-close {
-  position:absolute;top:9px;right:10px;width:29px;height:29px;
-  border:0;border-radius:10px;background:#ffffff12;color:#e5e5ff;font-size:18px;
+.cloud:before{width:75px;height:75px;left:-12px;top:27px}
+.cloud:after{width:72px;height:72px;right:-12px;top:27px}
+.face{position:absolute;z-index:3;inset:0}
+.eye{
+ position:absolute;top:37px;width:9px;height:24px;
+ background:white;border-radius:10px;
+ box-shadow:0 0 9px #ffffffbb;transform:rotate(19deg);
+ transition:.25s;
 }
-.pet-card {
-  position:relative;min-height:310px;overflow:hidden;display:flex;
-  flex-direction:column;align-items:center;justify-content:center;
-  border:1px solid #ffffff17;border-radius:29px;
-  background:radial-gradient(ellipse at 50% 65%,#6678e72b,transparent 55%),
-  linear-gradient(145deg,#242d59cc,#201b45dd);
-  box-shadow:0 18px 55px #0003,inset 0 1px #ffffff12;
+.eye.left{left:62px}
+.eye.right{right:62px}
+@keyframes float{
+ 0%,100%{transform:translateY(0) rotate(0)}
+ 50%{transform:translateY(-9px) rotate(1deg)}
 }
-.pet-card:before,.pet-card:after {
-  content:"";position:absolute;border-radius:50%;filter:blur(1px);pointer-events:none;
+.cloud.angry .eye,.cloud.rage .eye{height:17px;transform:rotate(35deg)}
+.cloud.sad .eye,.cloud.crying .eye{height:14px;transform:rotate(-15deg)}
+.cloud.happy .eye,.cloud.laughing .eye{height:7px;transform:rotate(0)}
+.cloud.love .eye{height:20px;transform:rotate(25deg)}
+.cloud.cold{filter:hue-rotate(15deg) brightness(1.2)}
+.cloud.party{filter:brightness(1.2) drop-shadow(0 0 12px #a3aaff)}
+.cloud.angry,.cloud.rage{filter:hue-rotate(-20deg) drop-shadow(0 0 12px #ff526f)}
+.cloud.tender{filter:brightness(1.08)}
+.cloud.angel{filter:brightness(1.2) drop-shadow(0 0 10px white)}
+.cloud.smirk .eye.right{transform:rotate(40deg);height:13px}
+.cloud.wink .eye.right{height:3px;top:47px}
+.cloud.rage{animation:rage .15s infinite}
+@keyframes rage{
+ 0%,100%{transform:translateX(-2px) rotate(-2deg)}
+ 50%{transform:translateX(2px) rotate(2deg)}
 }
-.pet-card:before { width:180px;height:180px;background:#7e8dff12;top:-90px;left:-65px; }
-.pet-card:after { width:160px;height:160px;background:#d28bff12;bottom:-85px;right:-45px; }
-.pet-label {
-  position:absolute;top:19px;left:19px;display:flex;align-items:center;
-  gap:7px;color:#c6cafa;font-size:12px;font-weight:650;
+.chat{
+ flex:1;min-height:150px;max-height:340px;overflow-y:auto;
+ background:#ffffffa8;border:1px solid white;border-radius:20px;
+ padding:12px;display:flex;flex-direction:column;gap:10px;
 }
-.online-dot { width:7px;height:7px;border-radius:50%;background:#70f0b2;box-shadow:0 0 10px #70f0b2; }
-.cloud-wrap { width:220px;height:180px;display:grid;place-items:center;position:relative;margin-top:12px; }
-.cloud {
-  position:relative;width:164px;height:103px;border-radius:58px;
-  background:radial-gradient(ellipse at 28% 17%,#ffffffb0 0%,transparent 23%),
-  radial-gradient(ellipse at 70% 15%,#e4d7ff 0%,transparent 30%),
-  linear-gradient(145deg,#a5baff 0%,#7b8df6 38%,#8c69d9 72%,#b17be9 100%);
-  box-shadow:inset 0 7px 13px #ffffff78,inset 0 -13px 20px #4a42a877,
-  0 12px 28px #6178ff66,0 0 45px #a47cff44;
-  animation:cloudFloat 3.8s ease-in-out infinite;z-index:2;
-  transition:background .3s,box-shadow .3s,transform .3s;
+.msg{
+ max-width:85%;padding:11px 14px;border-radius:17px;
+ line-height:1.35;overflow-wrap:anywhere;white-space:pre-wrap;
 }
-.cloud:before,.cloud:after { content:"";position:absolute;border-radius:50%;background:inherit;box-shadow:inherit; }
-.cloud:before { width:90px;height:90px;left:19px;top:-39px; }
-.cloud:after { width:83px;height:83px;right:15px;top:-29px; }
-.cloud .shine {
-  position:absolute;z-index:3;width:42px;height:10px;left:39px;top:14px;
-  border-radius:50%;background:#ffffff85;filter:blur(5px);transform:rotate(-18deg);
+.user{align-self:flex-end;background:#dceaff;border-bottom-right-radius:5px}
+.bot{align-self:flex-start;background:white;border-bottom-left-radius:5px;font-size:23px}
+.system{align-self:center;font-size:13px;color:#8190a7;text-align:center}
+.input-area{display:flex;gap:8px}
+input{
+ min-width:0;flex:1;border:0;border-radius:15px;
+ padding:14px;font-size:16px;outline:none;
+ box-shadow:0 3px 10px #9eb4d333;
 }
-.face {
-  position:absolute;z-index:5;left:0;right:0;top:35px;
-  display:flex;justify-content:center;align-items:center;gap:27px;pointer-events:none;
-}
-.eye { width:7px;height:18px;border-radius:10px;background:#fff;box-shadow:0 0 7px #ffffff99;transition:.2s; }
-@keyframes cloudFloat {
-  0%,100% { transform:translateY(0) rotate(-1deg); }
-  50% { transform:translateY(-11px) rotate(1deg); }
-}
-.cloud.blink .eye { height:3px;transform:translateY(7px); }
-.cloud.happy { box-shadow:inset 0 7px 13px #ffffff78,inset 0 -13px 20px #4a42a877,0 12px 30px #8d9dff88,0 0 55px #a47cff66; }
-.cloud.sad { filter:saturate(.78);transform:rotate(-3deg); }
-.cloud.angry { background:linear-gradient(145deg,#ffb1b1,#e66a8c 60%,#a64d9b);box-shadow:0 12px 30px #ff668855,0 0 45px #ff668833; }
-.cloud.rage { background:linear-gradient(145deg,#ff9a7b,#ed4e70 60%,#9f347b);box-shadow:0 12px 35px #ff3e5588,0 0 55px #ff3e5577;animation:rageShake .18s infinite; }
-.cloud.cold { background:linear-gradient(145deg,#d1f8ff,#72c8f2 60%,#6286e7);box-shadow:0 12px 30px #71d8ff66,0 0 45px #71d8ff44; }
-.cloud.party { background:linear-gradient(145deg,#fff0a3,#b98aff 55%,#6d8cff);box-shadow:0 12px 35px #c68aff77,0 0 55px #e6aaff66; }
-.cloud.smirk { background:linear-gradient(145deg,#b8b2ff,#7c76df 60%,#bd7de9); }
-.cloud.laughing { animation:laugh .25s infinite alternate; }
-.cloud.crying { filter:saturate(.65);box-shadow:0 12px 30px #77baff66,0 0 45px #77baff44; }
-.cloud.angel { background:linear-gradient(145deg,#fff4d2,#b6c8ff 60%,#b98eff); }
-@keyframes rageShake {
-  0%{transform:translateX(-2px) rotate(-2deg)}
-  50%{transform:translateX(2px) rotate(2deg)}
-  100%{transform:translateX(-2px) rotate(-2deg)}
-}
-@keyframes laugh {
-  from{transform:translateY(0) rotate(-2deg) scale(1)}
-  to{transform:translateY(-7px) rotate(2deg) scale(1.04)}
-}
-.cloud-shadow {
-  position:absolute;width:125px;height:17px;left:50%;bottom:17px;
-  transform:translateX(-50%);border-radius:50%;background:#05091d88;
-  filter:blur(9px);animation:shadowFloat 3.8s ease-in-out infinite;
-}
-@keyframes shadowFloat { 50%{transform:translateX(-50%) scale(.8);opacity:.55} }
-.pet-name { font-size:21px;font-weight:850;margin-top:2px; }
-.pet-mood { font-size:12px;color:#c2c8ed;margin-top:5px; }
-.stats { display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0; }
-.stat { padding:12px 9px;border:1px solid #ffffff13;border-radius:17px;background:#ffffff0b;text-align:center; }
-.stat-icon { font-size:18px; }
-.stat-value { font-size:15px;font-weight:800;margin-top:5px; }
-.stat-label { color:var(--muted);font-size:10px;margin-top:3px; }
-.panel {
-  border:1px solid #ffffff15;border-radius:23px;background:#1c2346c7;
-  padding:16px;margin-top:14px;box-shadow:0 10px 30px #0002;
-}
-.section-title { font-size:15px;font-weight:800;margin-bottom:13px;display:flex;align-items:center;gap:8px; }
-.actions { display:grid;grid-template-columns:repeat(2,1fr);gap:10px; }
-.action {
-  min-height:65px;display:flex;align-items:center;gap:11px;padding:11px 13px;
-  text-align:left;border:1px solid #ffffff14;border-radius:17px;
-  background:linear-gradient(140deg,#ffffff10,#ffffff05);transition:.18s;
-}
-.action:active { transform:scale(.96);background:#8797ff25; }
-.action-icon {
-  width:38px;height:38px;flex-shrink:0;display:grid;place-items:center;
-  border-radius:13px;background:#8797ff20;font-size:20px;
-}
-.action-name { font-size:13px;font-weight:750; }
-.action-desc { font-size:10px;color:var(--muted);margin-top:4px; }
-.chat-panel { padding-bottom:13px; }
-.chat-log {
-  height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;
-  padding:2px 1px 12px;scrollbar-width:thin;scrollbar-color:#7e8cff55 transparent;
-}
-.message {
-  max-width:88%;padding:10px 13px;border-radius:15px;font-size:15px;
-  line-height:1.4;overflow-wrap:anywhere;animation:messageIn .2s ease;
-}
-@keyframes messageIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
-.message.bot { align-self:flex-start;border-bottom-left-radius:5px;background:#8191ff20;border:1px solid #8191ff20;font-size:23px;min-width:55px; }
-.message.user { align-self:flex-end;border-bottom-right-radius:5px;background:linear-gradient(120deg,#647df0,#966fe2);font-size:14px; }
-.chat-input-row { display:flex;gap:8px;padding-top:10px;border-top:1px solid #ffffff12; }
-.chat-input {
-  flex:1;min-width:0;height:47px;border:1px solid #ffffff1c;outline:none;
-  border-radius:15px;padding:0 14px;color:white;background:#080e20aa;font-size:14px;
-}
-.chat-input:focus { border-color:#8b91ff;box-shadow:0 0 0 3px #8b91ff18; }
-.chat-input::placeholder { color:#929abb; }
-.send-button { width:48px;height:47px;border:0;border-radius:15px;background:linear-gradient(140deg,#728aff,#a278ed);font-size:20px;box-shadow:0 5px 18px #7586ff44; }
-.game-area { display:none;margin-top:13px;padding:15px;border:1px solid #9a9aff35;border-radius:18px;background:#7f85ff12; }
-.game-area.show { display:block;animation:messageIn .25s ease; }
-.game-title { font-size:14px;font-weight:800;margin-bottom:10px; }
-.game-text { color:#d0d5f5;font-size:13px;line-height:1.5;margin-bottom:12px;white-space:pre-line; }
-.game-options { display:flex;flex-wrap:wrap;gap:8px; }
-.game-button { min-width:54px;padding:10px 13px;border:1px solid #ffffff20;border-radius:13px;background:#ffffff12;font-size:19px; }
-.game-button:active { transform:scale(.93); }
-.game-result { margin-top:12px;font-size:13px;color:#e0e3ff;min-height:20px; }
-.footer { text-align:center;color:#858eaf;font-size:10px;padding:22px 0 5px; }
-.toast {
-  position:fixed;z-index:20;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));
-  transform:translate(-50%,20px);opacity:0;pointer-events:none;padding:12px 18px;
-  border:1px solid #ffffff22;border-radius:15px;background:#252c50;
-  box-shadow:0 10px 35px #0006;font-size:13px;transition:.25s;white-space:nowrap;
-}
-.toast.show { opacity:1;transform:translate(-50%,0); }
-@media(max-width:380px) {
-  .app{padding-left:11px;padding-right:11px}
-  .pet-card{min-height:285px}
-  .cloud-wrap{transform:scale(.9)}
-  .action{padding:9px;gap:8px}
-  .action-icon{width:34px;height:34px}
+#send{background:#8db8ff;color:white;font-size:17px}
+.hint{text-align:center;color:#8a98ad;font-size:12px;margin-top:-4px}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.actions button{padding:12px 4px;font-size:12px}
+.hidden{display:none!important}
+.game{background:white;border-radius:18px;padding:14px;text-align:center}
+.game h3{margin:0 0 10px}
+.game .big{font-size:36px;margin:12px}
+.choices{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.choices button{font-size:27px;padding:12px}
+@media(max-height:700px){
+ .pet-area{flex-basis:190px}
+ .cloud{transform:scale(.9)}
 }
 </style>
 </head>
-
 <body>
 <div class="app">
-  <header class="header">
-    <div class="brand">
-      <div class="brand-icon">☁️</div>
-      <div>
-        <div class="brand-name">Puhnet AI</div>
-        <div class="brand-sub">Твоё маленькое облачко</div>
-      </div>
-    </div>
-    <div class="header-actions">
-      <button class="icon-button" id="soundToggle" aria-label="Звук">🔊</button>
-    </div>
-  </header>
+<header>
+ <h2>☁️ Puhnet AI</h2>
+ <div class="header-buttons">
+  <button id="clearChat" title="Очистить историю">🗑️</button>
+  <button id="sound" title="Звук">🔊</button>
+ </div>
+</header>
 
-  <section class="update-notice" id="updateNotice">
-    <div class="notice-symbol">✨</div>
-    <div>
-      <div class="notice-title">Puhnet AI обновился!</div>
-      <div class="notice-text">Новый интерфейс, обновлённое облачко и улучшенные звуки. Загляни, что изменилось!</div>
-    </div>
-    <button class="notice-close" id="closeNotice" aria-label="Закрыть">×</button>
-  </section>
+<section class="pet-area">
+ <div class="cloud happy" id="cloud">
+  <div class="face">
+   <div class="eye left"></div>
+   <div class="eye right"></div>
+  </div>
+ </div>
+</section>
 
-  <section class="pet-card">
-    <div class="pet-label"><span class="online-dot"></span> Пухнет онлайн</div>
-    <div class="cloud-wrap">
-      <div class="cloud-shadow"></div>
-      <div class="cloud happy" id="cloud">
-        <div class="shine"></div>
-        <div class="face"><div class="eye left"></div><div class="eye right"></div></div>
-      </div>
-    </div>
-    <div class="pet-name">Пухнет</div>
-    <div class="pet-mood" id="moodText">☁️ Рад тебя видеть!</div>
-  </section>
+<section class="chat" id="chat"></section>
 
-  <section class="stats">
-    <div class="stat"><div class="stat-icon">🍪</div><div class="stat-value" id="cookieCount">3</div><div class="stat-label">Печеньки</div></div>
-    <div class="stat"><div class="stat-icon">⭐</div><div class="stat-value" id="happiness">100%</div><div class="stat-label">Настроение</div></div>
-    <div class="stat"><div class="stat-icon">🎮</div><div class="stat-value" id="wins">0</div><div class="stat-label">Победы в КНБ</div></div>
-  </section>
+<div class="game hidden" id="game"></div>
 
-  <section class="panel">
-    <div class="section-title">☁️ Забота о Пухнете</div>
-    <div class="actions">
-      <button class="action" id="feedButton"><span class="action-icon">🍪</span><span><div class="action-name">Покормить</div><div class="action-desc">Дать вкусную печеньку</div></span></button>
-      <button class="action" id="petButton"><span class="action-icon">🖐️</span><span><div class="action-name">Погладить</div><div class="action-desc">Порадовать облачко</div></span></button>
-      <button class="action" id="riddleButton"><span class="action-icon">🧩</span><span><div class="action-name">Ребус</div><div class="action-desc">Разгадай загадку</div></span></button>
-      <button class="action" id="rpsButton"><span class="action-icon">✊</span><span><div class="action-name">Камень, ножницы, бумага</div><div class="action-desc">Сыграй с Пухнетом</div></span></button>
-    </div>
-    <div class="game-area" id="gameArea">
-      <div class="game-title" id="gameTitle"></div>
-      <div class="game-text" id="gameText"></div>
-      <div class="game-options" id="gameOptions"></div>
-      <div class="game-result" id="gameResult"></div>
-    </div>
-  </section>
-
-  <section class="panel chat-panel">
-    <div class="section-title">💬 Общение с Пухнетом</div>
-    <div class="chat-log" id="chatLog"><div class="message bot">☁️ 👀 ✨</div></div>
-    <div class="chat-input-row">
-      <input class="chat-input" id="chatInput" placeholder="Напиши что-нибудь..." autocomplete="off">
-      <button class="send-button" id="sendButton" aria-label="Отправить">➤</button>
-    </div>
-  </section>
-
-  <footer class="footer">Puhnet AI ☁️</footer>
+<div class="input-area">
+ <input id="message" placeholder="Напиши Пухнету..." autocomplete="off">
+ <button id="send">➤</button>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="hint">Пухнет всегда рад общению ☁️</div>
+
+<div class="actions" id="actions">
+ <button id="feed">🍪 Покормить</button>
+ <button id="pet">💗 Погладить</button>
+ <button id="rebus">🧩 Ребус</button>
+ <button id="rps">✊ КНБ</button>
+</div>
+</div>
 
 <script>
-const $ = id => document.getElementById(id);
+const $=id=>document.getElementById(id);
+const cloud=$("cloud"),chat=$("chat"),game=$("game");
+const actions=$("actions"),input=$("message");
 
-let cookies=3, happiness=100, wins=0, rpsWins=0, rpsLosses=0;
-let soundEnabled=true, currentGame=null, currentRiddle=null, toastTimer=null;
+const STORAGE_KEY="puhnet_ai_local_chat_v1";
+let soundOn=true,busy=false,cookies=3;
+let gameMode="",puzzleIndex=0,userWins=0,botWins=0;
+let audioCtx=null;
 
-const memory={cookiesStolen:false,complimented:false,fed:false,lastMood:"happy"};
-const cloud=$("cloud");
+let memory={
+ cookiesStolen:false,complimented:false,fed:false,lastMood:"happy"
+};
 
-$("closeNotice").addEventListener("click",()=>{$("updateNotice").style.display="none";});
+/* ЛОКАЛЬНАЯ ПАМЯТЬ ЧАТА */
+function saveChat(){
+ try{
+  const messages=[...chat.children].map(el=>({
+   type:el.classList.contains("user")?"user":
+        el.classList.contains("bot")?"bot":"system",
+   text:el.textContent
+  }));
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(messages.slice(-200)));
+ }catch(e){}
+}
 
-let audioContext=null;
-function getAudio(){
-  if(!audioContext){
-    const AudioCtx=window.AudioContext||window.webkitAudioContext;
-    if(!AudioCtx)return null;
-    audioContext=new AudioCtx();
+function loadChat(){
+ try{
+  const saved=localStorage.getItem(STORAGE_KEY);
+  if(saved){
+   const messages=JSON.parse(saved);
+   if(Array.isArray(messages)){
+    messages.slice(-200).forEach(m=>{
+     if(typeof m.text==="string"&&["user","bot","system"].includes(m.type)){
+      addMessage(m.text,m.type,false);
+     }
+    });
+   }
   }
-  if(audioContext.state==="suspended")audioContext.resume();
-  return audioContext;
+ }catch(e){
+  localStorage.removeItem(STORAGE_KEY);
+ }
+ if(!chat.children.length){
+  addMessage("Пухнет проснулся!","system",false);
+  addMessage("🥹👋","bot",false);
+  saveChat();
+ }
+ scrollChat();
 }
 
-function tone(freq,duration,type="sine",volume=.07,delay=0,endFreq=null){
-  if(!soundEnabled)return;
-  const ctx=getAudio();if(!ctx)return;
-  const start=ctx.currentTime+delay;
-  const osc=ctx.createOscillator(),gain=ctx.createGain();
-  osc.type=type;osc.frequency.setValueAtTime(freq,start);
-  if(endFreq)osc.frequency.exponentialRampToValueAtTime(Math.max(1,endFreq),start+duration);
-  gain.gain.setValueAtTime(.001,start);
-  gain.gain.exponentialRampToValueAtTime(volume,start+.025);
-  gain.gain.exponentialRampToValueAtTime(.001,start+duration);
-  osc.connect(gain);gain.connect(ctx.destination);
-  osc.start(start);osc.stop(start+duration+.03);
+function clearChat(){
+ if(!confirm("Очистить всю локальную историю чата?"))return;
+ localStorage.removeItem(STORAGE_KEY);
+ chat.innerHTML="";
+ addMessage("История очищена. Пухнет снова готов общаться!","system");
+ addMessage("☁️👀","bot");
 }
 
-function noise(duration=.12,volume=.025,delay=0){
-  if(!soundEnabled)return;
-  const ctx=getAudio();if(!ctx)return;
-  const length=Math.floor(ctx.sampleRate*duration);
-  const buffer=ctx.createBuffer(1,length,ctx.sampleRate);
-  const data=buffer.getChannelData(0);
-  for(let i=0;i<length;i++)data[i]=(Math.random()*2-1)*(1-i/length);
-  const source=ctx.createBufferSource(),gain=ctx.createGain(),filter=ctx.createBiquadFilter();
-  source.buffer=buffer;filter.type="lowpass";filter.frequency.value=1500;
-  const start=ctx.currentTime+delay;
-  gain.gain.setValueAtTime(volume,start);
-  gain.gain.exponentialRampToValueAtTime(.001,start+duration);
-  source.connect(filter);filter.connect(gain);gain.connect(ctx.destination);
-  source.start(start);source.stop(start+duration);
+/* ЗВУКИ */
+function getAudio(){
+ if(!audioCtx){
+  const C=window.AudioContext||window.webkitAudioContext;
+  if(!C)return null;
+  audioCtx=new C();
+ }
+ if(audioCtx.state==="suspended")audioCtx.resume();
+ return audioCtx;
+}
+
+function note(freq,delay,duration,volume=.045,type="sine",endFreq=null){
+ if(!soundOn)return;
+ const ctx=getAudio();if(!ctx)return;
+ const start=ctx.currentTime+delay;
+ const osc=ctx.createOscillator(),gain=ctx.createGain();
+ osc.type=type;
+ osc.frequency.setValueAtTime(freq,start);
+ if(endFreq)osc.frequency.exponentialRampToValueAtTime(endFreq,start+duration);
+ gain.gain.setValueAtTime(.001,start);
+ gain.gain.exponentialRampToValueAtTime(volume,start+.025);
+ gain.gain.exponentialRampToValueAtTime(.001,start+duration);
+ osc.connect(gain);gain.connect(ctx.destination);
+ osc.start(start);osc.stop(start+duration+.03);
+}
+
+function chord(notes,spacing=.09){
+ notes.forEach((n,i)=>note(n,i*spacing,.24,.035,"sine"));
 }
 
 function playSound(name){
-  if(!soundEnabled)return;
-  switch(name){
-    case "happy":
-      tone(520,.13,"sine",.07,0,680);tone(680,.19,"sine",.06,.12,920);tone(920,.24,"triangle",.045,.25,1050);break;
-    case "laugh":
-      tone(650,.09,"triangle",.05,0,850);tone(780,.08,"triangle",.05,.11,980);
-      tone(620,.1,"triangle",.05,.22,820);tone(850,.15,"sine",.045,.34,1050);break;
-    case "sad":
-      tone(420,.3,"sine",.055,0,310);tone(310,.35,"sine",.045,.28,230);break;
-    case "angry":
-      tone(170,.18,"sawtooth",.045,0,110);tone(130,.2,"square",.035,.16,90);noise(.12,.025,.08);break;
-    case "cold":
-      tone(1100,.12,"sine",.035,0,800);tone(1350,.14,"sine",.035,.12,1000);break;
-    case "party":
-      tone(500,.13,"triangle",.06,0,750);tone(750,.13,"triangle",.06,.12,1000);tone(1000,.2,"triangle",.06,.24,1300);break;
-    case "feed":
-      tone(430,.09,"sine",.055,0,550);tone(620,.14,"sine",.055,.1,740);noise(.07,.018,.03);break;
-    case "pet":
-      tone(600,.2,"sine",.04,0,780);tone(780,.25,"sine",.04,.16,950);break;
-    case "click":tone(520,.055,"sine",.035,0,410);break;
-    case "win":
-      tone(520,.12,"triangle",.06);tone(660,.12,"triangle",.06,.12);tone(790,.2,"triangle",.06,.24);break;
-    case "lose":
-      tone(390,.2,"sine",.05,0,280);tone(280,.25,"sine",.04,.19,190);break;
-    case "cookie":noise(.1,.035);tone(900,.08,"sine",.035,.05,650);break;
-  }
+ if(!soundOn)return;
+ switch(name){
+  case "happy":
+  case "love":
+   note(523,0,.18,.05,"sine",659);
+   note(659,.13,.2,.05,"sine",784);
+   note(784,.28,.28,.045,"sine",988);
+   break;
+  case "party":
+  case "win":
+   [523,659,784,1047].forEach((n,i)=>note(n,i*.11,.22,.05,"triangle"));
+   break;
+  case "laughing":
+   for(let i=0;i<4;i++){
+    note(600+(i%2)*150,i*.16,.12,.04,"triangle",850);
+   }
+   break;
+  case "sad":
+   note(440,0,.35,.045,"sine",370);
+   note(370,.3,.4,.04,"sine",294);
+   break;
+  case "crying":
+   note(620,0,.28,.04,"sine",420);
+   note(520,.25,.3,.035,"sine",350);
+   note(440,.52,.35,.03,"sine",300);
+   break;
+  case "angry":
+  case "rage":
+   note(160,0,.24,.04,"sawtooth",100);
+   note(125,.2,.25,.035,"triangle",80);
+   break;
+  case "cold":
+   note(1200,0,.12,.025,"sine",850);
+   note(950,.17,.15,.03,"sine",1300);
+   break;
+  case "angel":
+   chord([659,784,988],.16);
+   break;
+  case "smirk":
+  case "wink":
+   note(700,0,.12,.04,"sine",950);
+   note(550,.17,.18,.035,"triangle",700);
+   break;
+  case "feed":
+   note(420,0,.1,.04,"sine",560);
+   note(560,.12,.14,.045,"sine",740);
+   note(740,.25,.18,.04,"sine",880);
+   break;
+  case "pet":
+   note(520,0,.2,.04,"sine",680);
+   note(680,.16,.25,.04,"sine",850);
+   break;
+  case "click":
+   note(650,0,.055,.025,"sine",450);
+   break;
+  case "lose":
+   note(440,0,.22,.04,"sine",330);
+   note(330,.2,.3,.035,"sine",220);
+   break;
+ }
 }
 
-$("soundToggle").addEventListener("click",()=>{
-  soundEnabled=!soundEnabled;
-  $("soundToggle").textContent=soundEnabled?"🔊":"🔇";
-  if(soundEnabled){getAudio();playSound("click");}
-});
-
-const moods={
-  happy:["☁️ Рад тебя видеть!","happy"],
-  sad:["☁️ Немного грустно...","sad"],
-  angry:["☁️ Я рассердился!","angry"],
-  rage:["☁️ ГРРР!","rage"],
-  crying:["☁️ Мне грустно...","crying"],
-  cold:["☁️ Бррр, холодно!","cold"],
-  party:["☁️ УРААА!","party"],
-  laughing:["☁️ ХИХИХИ!","laughing"],
-  smirk:["☁️ Хммм...","smirk"],
-  angel:["☁️ Такой спокойный день","angel"]
+$("sound").onclick=()=>{
+ soundOn=!soundOn;
+ $("sound").textContent=soundOn?"🔊":"🔇";
+ if(soundOn)playSound("click");
 };
 
+$("clearChat").onclick=clearChat;
+
 function mood(name){
-  const data=moods[name]||moods.happy;
-  cloud.className="cloud "+data[1];
-  $("moodText").textContent=data[0];
-  memory.lastMood=name;
-  if(name==="laughing")playSound("laugh");
-  else if(name==="angry"||name==="rage")playSound("angry");
-  else playSound(name);
+ cloud.className="cloud "+name;
+ memory.lastMood=name;
+ playSound(name);
 }
 
-function blink(){
-  cloud.classList.add("blink");
-  setTimeout(()=>cloud.classList.remove("blink"),160);
-}
-setInterval(()=>{if(Math.random()<.65)blink();},3200);
-
-function toast(text){
-  const el=$("toast");el.textContent=text;el.classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>el.classList.remove("show"),2200);
+/* ЧАТ */
+function addMessage(text,type="bot",save=true){
+ const el=document.createElement("div");
+ el.className=type==="user"?"msg user":type==="system"?"system":"msg bot";
+ el.textContent=text;
+ chat.appendChild(el);
+ scrollChat();
+ if(save)saveChat();
 }
 
-function addMessage(text,type="bot"){
-  const msg=document.createElement("div");
-  msg.className="message "+type;msg.textContent=text;
-  $("chatLog").appendChild(msg);
-  $("chatLog").scrollTop=$("chatLog").scrollHeight;
+function addUser(text){addMessage(text,"user")}
+function addBot(text){addMessage(text,"bot")}
+function system(text){addMessage(text,"system")}
+
+function scrollChat(){chat.scrollTop=chat.scrollHeight}
+function delay(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+function normalize(s){
+ return s.toLowerCase().replace(/ё/g,"е").trim();
 }
 
-function bot(text,emotion=null){
-  if(emotion)mood(emotion);
-  addMessage(text,"bot");
+/* ЭМОЦИИ И РЕАКЦИИ */
+function isInsultDirectedAtPuhnet(text){
+ const words=normalize(text).match(/[а-яa-z0-9-]+/g)||[];
+ const insults=["лох","идиот","дебил","дурак","тупой","тупая",
+ "тупица","придурок","кретин","урод","глупый","глупая"];
+ const targets=["ты","тебя","тебе","тобой","твой","твоя",
+ "твое","твои","пухнет","пухнета","пухнету"];
+ return words.some(w=>targets.includes(w))&&
+ words.some(w=>insults.some(b=>w===b));
 }
 
-function updateStats(){
-  $("cookieCount").textContent=cookies;
-  $("happiness").textContent=happiness+"%";
-  $("wins").textContent=wins;
+async function understand(raw){
+ const t=normalize(raw);
+
+ if(/съел.*печень|съела.*печень|забрал.*печень|украл.*печень/.test(t)){
+  memory.cookiesStolen=true;
+  mood("rage");await delay(700);
+  mood("crying");addBot("🤬😭");
+  await delay(600);mood("sad");return;
+ }
+
+ if(isInsultDirectedAtPuhnet(t)){
+  mood("angry");await delay(700);
+  mood("crying");addBot("🤬😭💔");
+  await delay(600);mood("sad");return;
+ }
+
+ if(/прости|извини|не хотел|не хотела/.test(t)){
+  mood("tender");addBot(memory.cookiesStolen?"🥺💗":"😇💗");
+  memory.cookiesStolen=false;return;
+ }
+
+ if(/люблю тебя|ты классный|ты хороший|молодец|умный|красивый|ты лучший|спасибо/.test(t)){
+  memory.complimented=true;mood("love");addBot("🥹💗");return;
+ }
+
+ if(/шутка|смешно|ха-ха|ахах|хах/.test(t)){
+  mood("laughing");addBot("😂🤣");return;
+ }
+
+ if(/грустно|плохо|печально|я расстроен|я расстроена/.test(t)){
+  mood("tender");addBot("🥺💗");return;
+ }
+
+ if(/злюсь|бесит|раздражает|я зол|я зла/.test(t)){
+  mood("sad");addBot("🥺");return;
+ }
+
+ if(/привет|здравствуй|хай|ку\b/.test(t)){
+  mood("happy");addBot("👋🥰");return;
+ }
+
+ if(/как дела|как ты|что делаешь/.test(t)){
+  mood("happy");addBot("🥰✨");return;
+ }
+
+ if(/спишь|спокойной ночи/.test(t)){
+  mood("angel");addBot("😴💤");return;
+ }
+
+ if(/пока|до свидания/.test(t)){
+  mood("sad");addBot("👋🥺");return;
+ }
+
+ if(/думаешь|не знаешь|почему/.test(t)){
+  mood("smirk");addBot("🤔💭");return;
+ }
+
+ if(/печеньк|печенье/.test(t)){
+  mood("happy");addBot(memory.cookiesStolen?"🥺🍪":"🍪😍");return;
+ }
+
+ if(/ура|победа|круто/.test(t)){
+  mood("party");addBot("🥳🎉");return;
+ }
+
+ const reactions=[
+  ["happy","🥰"],["wink","😉✨"],["cold","🥶❄️"],
+  ["tender","🥹💗"],["angel","😇✨"],["party","🥳🎉"],
+  ["smirk","😏"],["laughing","😂🤣"]
+ ];
+ const r=reactions[Math.floor(Math.random()*reactions.length)];
+ mood(r[0]);addBot(r[1]);
 }
 
-function feed(){
-  if(cookies<=0){mood("sad");bot("🥺 🍪 ❓");toast("Печеньки закончились!");return;}
-  cookies--;happiness=Math.min(100,happiness+8);memory.fed=true;
-  updateStats();mood("happy");playSound("feed");
-  const snack=document.createElement("div");
-  snack.textContent="🍪";
-  Object.assign(snack.style,{
-    position:"absolute",zIndex:"10",fontSize:"30px",left:"50%",top:"42%",
-    transform:"translate(-50%,-50%)",transition:"all .7s ease"
-  });
-  cloud.appendChild(snack);
-  requestAnimationFrame(()=>{
-    snack.style.transform="translate(-50%,-120%) scale(.2)";
-    snack.style.opacity="0";
-  });
-  setTimeout(()=>snack.remove(),750);
-  bot("😋 🍪 ✨");toast("Пухнет доволен!");
+/* ОТПРАВКА */
+async function sendMessage(){
+ const text=input.value.trim();
+ if(!text)return;
+ input.value="";
+ addUser(text);
+ playSound("click");
+
+ if(!game.classList.contains("hidden")){
+  if(gameMode==="rebus")checkRebus(text);
+  return;
+ }
+ if(busy){addBot("😤");return;}
+ busy=true;
+ await understand(text);
+ busy=false;
 }
-$("feedButton").addEventListener("click",feed);
+
+$("send").onclick=sendMessage;
+input.addEventListener("keydown",e=>{
+ if(e.key==="Enter")sendMessage();
+});
+
+/* КОРМЛЕНИЕ И ПОГЛАЖИВАНИЕ */
+async function feed(){
+ if(busy||!game.classList.contains("hidden"))return;
+ if(cookies<=0){mood("sad");addBot("🥺🍪");return;}
+ cookies--;memory.fed=true;
+ mood("happy");addBot("😍🍪");
+ await delay(350);mood("love");addBot("🥰💗");
+}
+$("feed").onclick=feed;
 
 function pet(){
-  happiness=Math.min(100,happiness+5);updateStats();
-  mood("happy");playSound("pet");bot("🥹 ☁️ ✨");
-  cloud.animate([
-    {transform:"scale(1)"},{transform:"scale(1.1) translateY(-5px)"},
-    {transform:"scale(.98)"},{transform:"scale(1)"}
-  ],{duration:550,easing:"ease-out"});
+ if(busy||!game.classList.contains("hidden"))return;
+ mood("love");addBot("🥰💗");
+ cloud.animate([
+  {transform:"scale(1)"},{transform:"scale(1.1)"},
+  {transform:"scale(.98)"},{transform:"scale(1)"}
+ ],{duration:500});
 }
-$("petButton").addEventListener("click",pet);
+$("pet").onclick=pet;
 
-const riddles=[
-  {q:"🐱 🥛",a:["кот молоко","кот и молоко","кошка молоко"]},
-  {q:"🐝 🍍",a:["пчела ананас","пчела и ананас"]},
-  {q:"🌞 🌻",a:["солнце подсолнух","солнце и подсолнух"]},
-  {q:"🐟 🌊",a:["рыба море","рыба и море"]},
-  {q:"🍎 🌳",a:["яблоко дерево","яблоко и дерево"]},
-  {q:"🐶 🦴",a:["собака кость","собака и кость"]},
-  {q:"🌙 ⭐",a:["луна звезда","луна и звезда"]},
-  {q:"❄️ ☃️",a:["снег снеговик","снег и снеговик"]},
-  {q:"🚗 ⛽",a:["машина бензин","машина и бензин"]},
-  {q:"🐻 🍯",a:["медведь мед","медведь и мед"]},
-  {q:"🌧️ ☂️",a:["дождь зонт","дождь и зонт"]},
-  {q:"🍋 🍵",a:["лимон чай","лимонный чай"]},
-  {q:"🐸 💧",a:["лягушка вода","лягушка и вода"]},
-  {q:"🌲 🎄",a:["елка дерево","ёлка дерево"]},
-  {q:"🦷 🪥",a:["зубная щетка","зубы щетка","чистить зубы"]},
-  {q:"🐌 🏠",a:["улитка дом","улитка и дом"]},
-  {q:"🍓 🥛",a:["клубничное молоко","клубника молоко"]},
-  {q:"🌈 🌧️",a:["радуга дождь","радуга после дождя"]},
-  {q:"🐝 🌼",a:["пчела цветок","пчела и цветок"]},
-  {q:"🚀 🌕",a:["ракета луна","ракета на луну"]}
+/* РЕБУСЫ */
+const puzzles=[
+ ["🐈‍⬛👢",["кот в сапогах","котвсапогах"]],
+ ["🕷️🦸‍♂️🕸️",["человек паук","человек-паук","человекпаук"]],
+ ["❄️👸",["снежная королева","снежнаякоролева"]],
+ ["🐸👑",["царевна лягушка","царевна-лягушка"]],
+ ["🍋🥤",["лимонад"]],
+ ["🎄🎁",["новый год","новыйгод"]],
+ ["🌈🌧️",["радуга"]],
+ ["🐻🍯",["винни пух","винни-пух","виннипух"]],
+ ["🚀🌌",["космос"]],
+ ["🐔🥚",["яйцо"]],
+ ["🧊🏠",["иглу"]],
+ ["🦋🌸",["бабочка"]],
+ ["🐟🌊",["рыба"]],
+ ["🌙⭐",["ночь"]],
+ ["🍎🥧",["яблочный пирог","яблочныйпирог"]],
+ ["🐰🥕",["заяц"]],
+ ["🐱🐭",["кот и мышь","котимышь"]],
+ ["🐝🍯",["мед","мёд"]],
+ ["🐢🏁",["черепаха"]],
+ ["☀️🌻",["подсолнух"]]
 ];
 
-function normalize(text){
-  return text.toLowerCase().replace(/ё/g,"е")
-    .replace(/[.,!?;:()[\]{}"'«»]/g," ").replace(/\s+/g," ").trim();
+function startRebus(){
+ if(busy)return;
+ gameMode="rebus";puzzleIndex=0;
+ actions.classList.add("hidden");
+ game.classList.remove("hidden");
+ showPuzzle();
 }
 
-function openGame(title,text,options=[]){
-  currentGame=null;
-  $("gameArea").classList.add("show");
-  $("gameTitle").textContent=title;
-  $("gameText").textContent=text;
-  $("gameResult").textContent="";
-  const container=$("gameOptions");container.innerHTML="";
-  options.forEach(option=>{
-    const button=document.createElement("button");
-    button.className="game-button";button.textContent=option.label;
-    button.addEventListener("click",option.action);
-    container.appendChild(button);
-  });
+function showPuzzle(){
+ game.innerHTML="<h3>🧩 Угадай ребус!</h3>"+
+ '<div class="big">'+puzzles[puzzleIndex][0]+"</div>"+
+ "<div>Напиши ответ в поле ниже</div>"+
+ '<div style="margin-top:8px;color:#91a0b4;font-size:12px">'+
+ (puzzleIndex+1)+" / "+puzzles.length+"</div>";
+ mood("happy");
 }
 
-function startRiddle(){
-  currentRiddle=riddles[Math.floor(Math.random()*riddles.length)];
-  openGame("🧩 Ребус",currentRiddle.q+"\n\nЧто это значит? Напиши ответ в чат.");
-  currentGame="riddle";mood("smirk");bot("🧩 👀");
-}
-$("riddleButton").addEventListener("click",startRiddle);
-
-function checkRiddle(answer){
-  if(!currentRiddle)return false;
-  const normalized=normalize(answer);
-  const correct=currentRiddle.a.some(a=>normalize(a)===normalized);
-  if(correct){
-    $("gameResult").textContent="🎉 Правильно! Пухнет доволен!";
-    happiness=Math.min(100,happiness+5);mood("party");bot("🥳 🎉 ⭐");playSound("win");
-    currentGame=null;
-  }else{
-    $("gameResult").textContent="🤔 Не совсем! Попробуй ещё.";
-    mood("smirk");bot("🤔 ❓");
-  }
-  updateStats();return true;
+function checkRebus(answer){
+ const a=normalize(answer).replace(/[.,!?]/g,"").replace(/\s+/g," ").trim();
+ if(puzzles[puzzleIndex][1].some(x=>normalize(x)===a)){
+  mood("party");addBot("🥳🎉💗");puzzleIndex++;
+  if(puzzleIndex>=puzzles.length){
+   gameMode="";game.classList.add("hidden");
+   actions.classList.remove("hidden");
+   system("Все ребусы разгаданы!");
+   mood("party");addBot("🏆🥳💗");
+  }else setTimeout(showPuzzle,800);
+ }else{
+  mood("sad");addBot("🤔❓");
+ }
 }
 
-const rpsChoices=[
-  {name:"Камень",emoji:"✊",value:0},
-  {name:"Ножницы",emoji:"✌️",value:1},
-  {name:"Бумага",emoji:"✋",value:2}
-];
+/* КАМЕНЬ, НОЖНИЦЫ, БУМАГА */
+const moves=["✊","✌️","🖐️"];
 
 function startRPS(){
-  rpsWins=0;rpsLosses=0;showRPS();mood("happy");bot("🎮 ✊ ✌️ ✋");
+ if(busy)return;
+ gameMode="rps";userWins=0;botWins=0;
+ actions.classList.add("hidden");
+ game.classList.remove("hidden");
+ renderRPS();mood("happy");
 }
-function showRPS(){
-  openGame("✊ Камень, ножницы, бумага",
-    "Кто первым выиграет три раунда — тот победил!\nТвой счёт: "+rpsWins+" | Пухнет: "+rpsLosses,
-    rpsChoices.map(choice=>({label:choice.emoji,action:()=>playRPS(choice.value)})));
+
+function renderRPS(){
+ game.innerHTML="<h3>✊ Камень, ножницы, бумага</h3>"+
+ "<p>Кто первым наберёт 3 победы?</p>"+
+ '<div id="score">Ты '+userWins+" : "+botWins+" Пухнет</div>"+
+ '<div class="choices">'+
+ '<button data-move="0">✊</button>'+
+ '<button data-move="1">✌️</button>'+
+ '<button data-move="2">🖐️</button></div>';
+ game.querySelectorAll("[data-move]").forEach(b=>{
+  b.onclick=()=>playRPS(Number(b.dataset.move));
+ });
 }
+
 function playRPS(user){
-  if(rpsWins>=3||rpsLosses>=3){startRPS();return;}
-  const botChoice=Math.floor(Math.random()*3);
-  const u=rpsChoices[user],b=rpsChoices[botChoice];
-  let result;
-  if(user===botChoice){result="Ничья!";}
-  else if((user-botChoice+3)%3===1){
-    result="Ты выиграл раунд!";rpsWins++;wins++;
-    happiness=Math.min(100,happiness+2);playSound("win");mood("party");
-  }else{
-    result="Пухнет выиграл раунд!";rpsLosses++;playSound("lose");mood("smirk");
-  }
-  updateStats();
-  $("gameText").textContent="Ты: "+u.emoji+"   Пухнет: "+b.emoji;
-  if(rpsWins>=3){$("gameResult").textContent="🏆 Ты выиграл матч! Пухнет поздравляет!";bot("🥳 🏆 🎉");return;}
-  if(rpsLosses>=3){$("gameResult").textContent="☁️ Пухнет выиграл матч!";bot("😎 🏆");return;}
-  $("gameResult").textContent=result+" Счёт: "+rpsWins+" : "+rpsLosses;
-  showRPS();
-  $("gameResult").textContent=result+" Счёт: "+rpsWins+" : "+rpsLosses;
-}
-$("rpsButton").addEventListener("click",startRPS);
-
-function isInsultDirectedAtPuhnet(text){
-  const words=normalize(text).match(/[а-яa-z0-9-]+/g)||[];
-  const insults=[
-    "лох","лохушка","идиот","идиотка","дебил","дебилка",
-    "дурак","дура","тупой","тупая","тупица","придурок",
-    "кретин","урод","глупый","глупая","ничтожество",
-    "бестолочь","мерзкий","противный","лохматый"
-  ];
-  const targets=["ты","тебя","тебе","тобой","твой","твоя","твое","твои","пухнет","пухнета","пухнету"];
-  const hasTarget=words.some(w=>targets.includes(w));
-  const hasInsult=words.some(word=>insults.some(bad=>
-    word===bad||(bad.length>=4&&word.startsWith(bad)&&word.length<=bad.length+4)
-  ));
-  return hasTarget&&hasInsult;
+ if(gameMode!=="rps")return;
+ const bot=Math.floor(Math.random()*3);
+ let result;
+ if(user===bot){
+  result="🤝😐";mood("tender");
+ }else if((user-bot+3)%3===1){
+  userWins++;result=moves[bot]+"😭";mood("party");playSound("win");
+ }else{
+  botWins++;result=moves[bot]+"😎";mood("smirk");playSound("lose");
+ }
+ addBot(result);
+ if(userWins>=3||botWins>=3){
+  const won=userWins>=3;gameMode="";
+  setTimeout(()=>{
+   game.classList.add("hidden");actions.classList.remove("hidden");
+   system(won?"Ты победил!":"Пухнет победил!");
+   mood(won?"party":"happy");addBot(won?"🏆🥳":"😎🏆");
+  },700);
+ }else{
+  renderRPS();
+ }
 }
 
-function understand(rawText){
-  const text=normalize(rawText);
-  if(!text)return;
-  if(currentGame==="riddle"&&checkRiddle(text))return;
+$("rebus").onclick=startRebus;
+$("rps").onclick=startRPS;
 
-  if(text.includes("съел все печень")||text.includes("съела все печень")||
-     text.includes("забрал печень")||text.includes("украл печень")){
-    memory.cookiesStolen=true;mood("rage");bot("🤬 🍪 😭","rage");
-    setTimeout(()=>{mood("crying");bot("😭 🥺");},900);return;
-  }
-
-  if(isInsultDirectedAtPuhnet(rawText)){
-    mood("angry");bot("🤬 😭");
-    setTimeout(()=>{mood("sad");bot("🥺 😢");},900);return;
-  }
-
-  if(text.includes("извини")||text.includes("прости")||text.includes("сорри")){
-    mood("happy");bot("🥹 ☁️ ✨");return;
-  }
-  if(text.includes("люблю")||text.includes("молодец")||text.includes("хороший")||
-     text.includes("умный")||text.includes("красивый")||text.includes("ты классный")){
-    memory.complimented=true;mood("happy");bot("🥹 😍 ✨");
-    happiness=Math.min(100,happiness+3);updateStats();return;
-  }
-  if(text.includes("смешно")||text.includes("ха ха")||text.includes("ахах")||text.includes("хах")){
-    mood("laughing");bot("😂 🤣 😜");return;
-  }
-  if(text.includes("грустно")||text.includes("плохо")||text.includes("печально")){
-    mood("sad");bot("🥺 🥲 ☁️");return;
-  }
-  if(text.includes("злой")||text.includes("злюсь")||text.includes("бесит")){
-    mood("angry");bot("😠 🤬");return;
-  }
-  if(text.includes("холодно")||text.includes("замерз")){
-    mood("cold");bot("🥶 ❄️");return;
-  }
-  if(text.includes("привет")||text.includes("здравствуй")||text.includes("хай")||text.includes("ку")){
-    mood("happy");bot("👋 ☁️ 😃");return;
-  }
-  if(text.includes("как дела")||text.includes("как ты")){
-    mood("happy");bot("🥳 ☁️ ✨");return;
-  }
-  if(text.includes("печень")||text.includes("покорми")){
-    mood("happy");bot("🍪 👀 😋");return;
-  }
-  if(text.includes("спишь")||text.includes("спокойной ночи")){
-    mood("angel");bot("😴 🌙 ☁️");return;
-  }
-  if(text.includes("ура")||text.includes("победа")||text.includes("круто")){
-    mood("party");bot("🥳 🎉 ✨");return;
-  }
-  const reactions=[
-    ["🤔 ☁️","smirk"],["👀 ✨","happy"],["😜 ☁️","happy"],
-    ["🥲 💭","sad"],["😏 ✨","smirk"],["🥹 ☁️","happy"],
-    ["😃 🌟","party"],["🙃 ☁️","smirk"]
-  ];
-  const reaction=reactions[Math.floor(Math.random()*reactions.length)];
-  bot(reaction[0],reaction[1]);
-}
-
-function sendMessage(){
-  const input=$("chatInput"),text=input.value.trim();
-  if(!text)return;
-  addMessage(text,"user");input.value="";playSound("click");
-  setTimeout(()=>understand(text),250);
-}
-$("sendButton").addEventListener("click",sendMessage);
-$("chatInput").addEventListener("keydown",event=>{if(event.key==="Enter")sendMessage();});
-
-updateStats();
-setTimeout(()=>mood("happy"),300);
+/* ЗАПУСК */
+loadChat();
 </script>
 </body>
 </html>
